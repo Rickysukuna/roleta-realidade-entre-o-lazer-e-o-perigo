@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roleta da Realidade</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #ff4d4d;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+      text-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
+    }
+
+    .descricao {
+      margin: 15px 0 25px;
+      font-size: 1.1em;
+      color: #ccc;
+      line-height: 1.6;
+    }
+
+    .form {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+      backdrop-filter: blur(10px);
+    }
+
+    input, button {
+      padding: 12px 15px;
+      margin: 8px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    input {
+      width: 200px;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    button {
+      background: linear-gradient(45deg, #ff416c, #ff4b2b);
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 75, 43, 0.4);
+    }
+
+    .roleta-container {
+      position: relative;
+      width: 350px;
+      height: 350px;
+      margin: 40px auto;
+    }
+
+    .roleta {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+      border: 3px solid #fff;
+    }
+
+    .wheel {
+      width: 100%;
+      height: 100%;
+      background: conic-gradient(
+        #8B0000 0deg 36deg,
+        #A52A2A 36deg 72deg,
+        #B22222 72deg 108deg,
+        #CD5C5C 108deg 144deg,
+        #DC143C 144deg 180deg,
+        #FFB6C1 180deg 216deg,
+        #FF69B4 216deg 252deg,
+        #FF1493 252deg 288deg,
+        #C71585 288deg 324deg,
+        #8B008B 324deg 360deg
+      );
+      transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+    }
+
+    .pointer {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 40px;
+      background: #fff;
+      clip-path: polygon(50% 100%, 0 0, 100% 0);
+      z-index: 10;
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+    }
+
+    .center-circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      background: #1a1a2e;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      z-index: 5;
+    }
+
+    .resultados {
+      margin: 30px 0;
+      min-height: 100px;
+    }
+
+    .resultado-item {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      margin: 10px;
+      border-radius: 10px;
+      border-left: 4px solid #ff4d4d;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    .resultado-ganho {
+      border-left-color: #4CAF50;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .historico {
+      margin-top: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 15px;
+    }
+
+    .historico h2 {
+      color: #4dabf7;
+      margin-bottom: 20px;
+      font-size: 1.8em;
+    }
+
+    .historico-lista {
+      list-style: none;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .historico-item {
+      background: rgba(255, 255, 255, 0.08);
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: left;
+    }
+
+    .historico-nome {
+      color: #4dabf7;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .estatisticas {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .estatistica-card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+      min-width: 120px;
+      margin: 5px;
+    }
+
+    .estatistica-numero {
+      font-size: 2em;
+      font-weight: bold;
+      color: #ff4d4d;
+    }
+
+    .estatistica-ganho {
+      color: #4CAF50;
+    }
+
+    @media (max-width: 600px) {
+      .roleta-container {
+        width: 280px;
+        height: 280px;
+      }
+      
+      h1 {
+        font-size: 2em;
+      }
+      
+      .form {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎰 Roleta da Realidade</h1>
+    <p class="descricao">
+      90% de chance de perder • 10% de chance de ganhar<br>
+      <strong>A casa sempre ganha...</strong>
+    </p>
+
+    <div class="estatisticas">
+      <div class="estatistica-card">
+        <div class="estatistica-numero" id="total-jogos">0</div>
+        <div>Total de Jogos</div>
+      </div>
+      <div class="estatistica-card">
+        <div class="estatistica-numero" id="total-perdas">0</div>
+        <div>Perdas</div>
+      </div>
+      <div class="estatistica-card">
+        <div class="estatistica-numero estatistica-ganho" id="total-ganhos">0</div>
+        <div>Ganhos</div>
+      </div>
+    </div>
+
+    <div class="form">
+      <input type="text" id="nome" placeholder="Digite seu nome" required>
+      <input type="number" id="tentativas" min="1" max="10" placeholder="Giros (1-10)" required>
+      <button onclick="girar()">Girar a Roleta</button>
+    </div>
+
+    <div class="roleta-container">
+      <div class="pointer"></div>
+      <div class="roleta">
+        <div class="wheel" id="wheel"></div>
+        <div class="center-circle"></div>
+      </div>
+    </div>
+
+    <div class="resultados" id="resultados"></div>
+
+    <div class="historico">
+      <h2>🏆 Histórico de Jogadores</h2>
+      <ul class="historico-lista" id="historico-lista"></ul>
+    </div>
+  </div>
+
+  <script>
+    // Configuração da roleta - 90% perda, 10% ganho
+    const opcoes = [
+      { tipo: "perda", texto: "💸 Você perdeu dinheiro" },
+      { tipo: "perda", texto: "👥 Você perdeu um amigo" },
+      { tipo: "perda", texto: "🤥 Você foi enganado" },
+      { tipo: "perda", texto: "⭐ Você perdeu sua reputação" },
+      { tipo: "perda", texto: "💳 Você ficou endividado" },
+      { tipo: "perda", texto: "⏰ Você perdeu tempo precioso" },
+      { tipo: "perda", texto: "💔 Você foi traído" },
+      { tipo: "perda", texto: "🕊️ Você perdeu sua paz interior" },
+      { tipo: "perda", texto: "🚪 Você perdeu oportunidades" },
+      { tipo: "ganho", texto: "💰 Você ganhou um pouco de dinheiro" }
+    ];
+
+    let estatisticas = {
+      totalJogos: 0,
+      totalPerdas: 0,
+      totalGanhos: 0
+    };
+
+    function girar() {
+      const nome = document.getElementById("nome").value.trim();
+      const tentativas = parseInt(document.getElementById("tentativas").value);
+
+      if (!nome || isNaN(tentativas) || tentativas < 1 || tentativas > 10) {
+        alert("Por favor, preencha corretamente!");
+        return;
+      }
+
+      let resultados = [];
+      const wheel = document.getElementById("wheel");
+      const resultadosDiv = document.getElementById("resultados");
+
+      resultadosDiv.innerHTML = "<h3>Resultados:</h3>";
+
+      // Reset da roleta
+      wheel.style.transform = "rotate(0deg)";
+
+      for (let i = 0; i < tentativas; i++) {
+        setTimeout(() => {
+          // Girar a roleta
+          const rotacao = 1800 + Math.floor(Math.random() * 360);
+          wheel.style.transform = `rotate(${rotacao}deg)`;
+
+          // Mostrar resultado após a animação
+          setTimeout(() => {
+            const sorteio = Math.random() < 0.9 ? 
+              Math.floor(Math.random() * 9) : // 90% de perda (índices 0-8)
+              9; // 10% de ganho (índice 9)
+            
+            const resultado = opcoes[sorteio];
+            resultados.push(resultado.texto);
+
+            const resultadoElement = document.createElement("div");
+            resultadoElement.className = `resultado-item ${resultado.tipo === 'ganho' ? 'resultado-ganho' : ''}`;
+            resultadoElement.innerHTML = `<strong>Rodada ${i + 1}:</strong> ${resultado.texto}`;
+            resultadosDiv.appendChild(resultadoElement);
+
+            // Atualizar estatísticas
+            if (resultado.tipo === 'perda') {
+              estatisticas.totalPerdas++;
+            } else {
+              estatisticas.totalGanhos++;
+            }
+
+            // Salvar resultado quando terminar todas as rodadas
+            if (i === tentativas - 1) {
+              estatisticas.totalJogos++;
+              salvarResultado(nome, resultados);
+              mostrarHistorico();
+              atualizarEstatisticas();
+            }
+          }, 4100);
+        }, i * 4500);
+      }
+    }
+
+    function salvarResultado(nome, resultados) {
+      const historico = JSON.parse(localStorage.getItem("historico_roleta")) || [];
+      historico.push({ 
+        nome, 
+        resultados, 
+        data: new Date().toLocaleString('pt-BR')
+      });
+      localStorage.setItem("historico_roleta", JSON.stringify(historico));
+    }
+
+    function mostrarHistorico() {
+      const historico = JSON.parse(localStorage.getItem("historico_roleta")) || [];
+      const lista = document.getElementById("historico-lista");
+      lista.innerHTML = "";
+
+      // Mostrar apenas os 10 mais recentes
+      const ultimos = historico.slice(-10).reverse();
+      
+      ultimos.forEach(item => {
+        const li = document.createElement("li");
+        li.className = "historico-item";
+        li.innerHTML = `
+          <div class="historico-nome">${item.nome}</div>
+          <div>${item.resultados.join("<br>")}</div>
+          <div style="font-size: 0.8em; color: #aaa; margin-top: 5px;">${item.data}</div>
+        `;
+        lista.appendChild(li);
+      });
+    }
+
+    function atualizarEstatisticas() {
+      document.getElementById("total-jogos").textContent = estatisticas.totalJogos;
+      document.getElementById("total-perdas").textContent = estatisticas.totalPerdas;
+      document.getElementById("total-ganhos").textContent = estatisticas.totalGanhos;
+    }
+
+    function carregarEstatisticas() {
+      const historico = JSON.parse(localStorage.getItem("historico_roleta")) || [];
+      estatisticas.totalJogos = historico.length;
+      
+      historico.forEach(item => {
+        item.resultados.forEach(resultado => {
+          if (resultado.includes("ganhou")) {
+            estatisticas.totalGanhos++;
+          } else {
+            estatisticas.totalPerdas++;
+          }
+        });
+      });
+      
+      atualizarEstatisticas();
+    }
+
+    // Inicialização
+    window.onload = function() {
+      carregarEstatisticas();
+      mostrarHistorico();
+    };
+  </script>
+</body>
+</html>
