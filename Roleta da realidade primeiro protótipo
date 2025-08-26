@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conscientização sobre Ludopatia</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 0; 
+      padding: 20px; 
+      background: #f4f4f4; 
+    }
+    header { 
+      background: #c00; 
+      color: white; 
+      padding: 20px; 
+      text-align: center; 
+    }
+    section { 
+      background: white; 
+      margin: 20px 0; 
+      padding: 20px; 
+      border-radius: 10px; 
+    }
+    ul { 
+      padding-left: 20px; 
+    }
+    textarea { 
+      width: 100%; 
+      height: 100px; 
+      padding: 10px; 
+      margin: 10px 0; 
+    }
+    button { 
+      background: #c00; 
+      color: white; 
+      padding: 10px 20px; 
+      border: none; 
+      border-radius: 5px; 
+      cursor: pointer;
+      margin: 5px 0;
+    }
+    button:hover {
+      background: #900;
+    }
+    #depoimentos li { 
+      background: #eee; 
+      margin: 10px 0; 
+      padding: 10px; 
+      border-radius: 5px; 
+    }
+    
+    /* Estilos da Roleta */
+    .roleta-container {
+      text-align: center;
+      margin: 30px 0;
+    }
+    .roleta {
+      width: 200px;
+      height: 200px;
+      border: 5px solid #333;
+      border-radius: 50%;
+      position: relative;
+      margin: 0 auto;
+      background: #fff;
+      overflow: hidden;
+      transition: transform 4s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+    }
+    .setor {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      transform-origin: bottom right;
+      left: 0;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 12px;
+    }
+    .perda { background: #ff6b6b; color: white; }
+    .ganho { background: #4ecdc4; color: white; }
+    .resultado {
+      margin: 20px 0;
+      padding: 15px;
+      background: #e9ecef;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .historico {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Conscientização sobre Ludopatia</h1>
+    <p>Jogos de azar podem ser viciantes. Saiba mais e ajude a espalhar a conscientização.</p>
+  </header>
+
+  <!-- Roleta da Realidade -->
+  <section class="roleta-container">
+    <h2>Roleta da Realidade</h2>
+    <p>90% de chances de perda, 10% de ganho pequeno</p>
+    
+    <div>
+      <label for="nome">Seu nome:</label>
+      <input type="text" id="nome" placeholder="Digite seu nome" style="padding: 8px; margin: 10px;">
+    </div>
+    
+    <div>
+      <label for="tentativas">Número de giros (1-10):</label>
+      <input type="number" id="tentativas" min="1" max="10" value="3" style="padding: 8px; margin: 10px;">
+    </div>
+    
+    <div class="roleta" id="roleta">
+      <!-- Setores da roleta serão criados via JavaScript -->
+    </div>
+    
+    <button onclick="girarRoleta()">Girar Roleta</button>
+    
+    <div class="resultado" id="resultado"></div>
+    
+    <div class="historico">
+      <h3>Histórico de Resultados</h3>
+      <div id="historico-resultados"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>O que é Ludopatia?</h2>
+    <p>Ludopatia é o vício em jogos de azar. É uma doença reconhecida pela OMS.</p>
+    
+    <h2>Sinais de Alerta</h2>
+    <ul>
+      <li>Pensar constantemente em jogos</li>
+      <li>Apostar quantias cada vez maiores</li>
+      <li>Tentativas repetidas de parar</li>
+      <li>Mentir sobre o hábito</li>
+      <li>Problemas financeiros</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Compartilhe seu Depoimento</h2>
+    <textarea id="mensagem" placeholder="Escreva sua experiência..."></textarea>
+    <button onclick="enviarDepoimento()">Enviar</button>
+    
+    <div id="lista-depoimentos">
+      <h3>Depoimentos</h3>
+      <ul id="depoimentos"></ul>
+    </div>
+  </section>
+
+  <footer style="background: #333; color: white; padding: 20px; text-align: center;">
+    <p>Se precisar de ajuda, ligue para o CVV: 188</p>
+  </footer>
+
+  <script>
+    // Dados da roleta (90% perda, 10% ganho)
+    const resultados = [
+      { tipo: 'perda', mensagem: 'Perdeu dinheiro' },
+      { tipo: 'perda', mensagem: 'Perdeu um objeto valioso' },
+      { tipo: 'perda', mensagem: 'Perdeu a confiança de um amigo' },
+      { tipo: 'perda', mensagem: 'Ficou endividado' },
+      { tipo: 'perda', mensagem: 'Perdeu oportunidade de emprego' },
+      { tipo: 'perda', mensagem: 'Problemas familiares' },
+      { tipo: 'perda', mensagem: 'Estresse e ansiedade' },
+      { tipo: 'perda', mensagem: 'Perda de sono' },
+      { tipo: 'perda', mensagem: 'Isolamento social' },
+      { tipo: 'ganho', mensagem: 'Ganhou uma pequena quantia' }
+    ];
+
+    // Criar setores da roleta
+    function criarSetores() {
+      const roleta = document.getElementById('roleta');
+      roleta.innerHTML = '';
+      
+      // 9 setores de perda (90%)
+      for(let i = 0; i < 9; i++) {
+        const setor = document.createElement('div');
+        setor.className = 'setor perda';
+        setor.style.transform = `rotate(${i * 36}deg)`;
+        setor.textContent = 'PERDA';
+        roleta.appendChild(setor);
+      }
+      
+      // 1 setor de ganho (10%)
+      const setorGanho = document.createElement('div');
+      setorGanho.className = 'setor ganho';
+      setorGanho.style.transform = `rotate(324deg)`;
+      setorGanho.textContent = 'GANHO';
+      roleta.appendChild(setorGanho);
+    }
+
+    // Girar a roleta
+    function girarRoleta() {
+      const nome = document.getElementById('nome').value;
+      const tentativas = parseInt(document.getElementById('tentativas').value);
+      
+      if (!nome) {
+        alert('Por favor, digite seu nome');
+        return;
+      }
+      
+      if (tentativas < 1 || tentativas > 10) {
+        alert('Número de tentativas deve ser entre 1 e 10');
+        return;
+      }
+      
+      let resultadosUsuario = [];
+      let girosRestantes = tentativas;
+      
+      function girarUmaVez() {
+        if (girosRestantes <= 0) {
+          mostrarResultadoFinal(nome, resultadosUsuario);
+          return;
+        }
+        
+        girosRestantes--;
+        
+        // Girar visualmente
+        const roleta = document.getElementById('roleta');
+        const graus = 3600 + Math.floor(Math.random() * 360);
+        roleta.style.transform = `rotate(${graus}deg)`;
+        
+        // Mostrar resultado após a animação
+        setTimeout(() => {
+          const resultadoAleatorio = resultados[Math.floor(Math.random() * resultados.length)];
+          resultadosUsuario.push(resultadoAleatorio);
+          
+          document.getElementById('resultado').innerHTML = `
+            <p><strong>${nome}</strong> - Giro ${tentativas - girosRestantes}: ${resultadoAleatorio.mensagem}</p>
+          `;
+          
+          girarUmaVez(); // Próximo giro
+        }, 4000);
+      }
+      
+      girarUmaVez();
+    }
+
+    // Mostrar resultado final
+    function mostrarResultadoFinal(nome, resultados) {
+      const totalGiros = resultados.length;
+      const totalPerdas = resultados.filter(r => r.tipo === 'perda').length;
+      const totalGanhos = resultados.filter(r => r.tipo === 'ganho').length;
+      
+      let mensagemFinal = `
+        <h3>Resultado Final para ${nome}:</h3>
+        <p>Total de giros: ${totalGiros}</p>
+        <p>Perdas: ${totalPerdas} (${((totalPerdas/totalGiros)*100).toFixed(1)}%)</p>
+        <p>Ganhos: ${totalGanhos} (${((totalGanhos/totalGiros)*100).toFixed(1)}%)</p>
+        <p><strong>A casa sempre ganha!</strong></p>
+      `;
+      
+      document.getElementById('resultado').innerHTML = mensagemFinal;
+      
+      // Salvar resultado (simulado)
+      salvarResultado(nome, totalGiros, totalPerdas, totalGanhos);
+    }
+
+    // Salvar resultado (simulado com localStorage)
+    function salvarResultado(nome, totalGiros, totalPerdas, totalGanhos) {
+      const resultado = {
+        nome: nome,
+        giros: totalGiros,
+        perdas: totalPerdas,
+        ganhos: totalGanhos,
+         new Date().toLocaleDateString()
+      };
+      
+      let historico = JSON.parse(localStorage.getItem('historicoRoleta')) || [];
+      historico.push(resultado);
+      localStorage.setItem('historicoRoleta', JSON.stringify(historico));
+      
+      mostrarHistorico();
+    }
+
+    // Mostrar histórico
+    function mostrarHistorico() {
+      const historico = JSON.parse(localStorage.getItem('historicoRoleta')) || [];
+      const divHistorico = document.getElementById('historico-resultados');
+      
+      if (historico.length === 0) {
+        divHistorico.innerHTML = '<p>Nenhum resultado registrado ainda.</p>';
+        return;
+      }
+      
+      let html = '<ul>';
+      historico.slice(-10).reverse().forEach(item => {
+        html += `
+          <li>
+            <strong>${item.nome}</strong> - ${item.data}<br>
+            Giros: ${item.giros} | Perdas: ${item.perdas} | Ganhos: ${item.ganhos}
+          </li>
+        `;
+      });
+      html += '</ul>';
+      
+      divHistorico.innerHTML = html;
+    }
+
+    // Funções existentes do depoimento
+    function enviarDepoimento() {
+      const msg = document.getElementById('mensagem').value;
+      if (msg.trim() !== '') {
+        const li = document.createElement('li');
+        li.textContent = msg;
+        document.getElementById('depoimentos').appendChild(li);
+        document.getElementById('mensagem').value = '';
+      }
+    }
+
+    // Inicializar
+    window.onload = function() {
+      criarSetores();
+      mostrarHistorico();
+    }
+  </script>
+</body>
+</html>
